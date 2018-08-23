@@ -1,7 +1,8 @@
-# time-series
-
+# Time Series
+```
 time series analysis and prediction
 
+```
 
 ### Install Dependencies
 
