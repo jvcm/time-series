@@ -42,10 +42,10 @@ class Hybrid_ANN:
 		# print(net3)
 		return net3
 
-	def fit_MPSO(self, X, y, d = 30, c1 = 0.5, c2 = 0.5, 
+	def fit_MPSO(self, X, y, d = 30, c1i = 2.0, c1f = 3.0, c2i = 2.0, c2f = 3.0,
 		w1 = 1.0, w2 = 2.0, maxt = 500):
 		#MPSO Algorythm
-		particles = np.random.rand(d, self.k)*5
+		particles = np.random.rand(d, self.k)
 		velocity = np.random.uniform(low = -1.0, high = 1.0, size = (d, self.k))
 		pBest = particles[:]
 		gBest = self.weight[:]
@@ -64,19 +64,16 @@ class Hybrid_ANN:
 			# print(best_fitness)
 			gBest = particles[np.argmin(fitness)]
 			bad_index = np.argmax(fitness)
-			# c1 = ((c1f - c1i)*t/maxt) +c1i
-			# c2 = ((c2f - c2i)*t/maxt) +c2i
+			c1 = ((c1f - c1i)*t/maxt) +c1i
+			c2 = ((c2f - c2i)*t/maxt) +c2i
 			w = w1 + (w2 - w1)*((maxt - t)/maxt)
-			if w < w1:
-				w = w1
-			elif w > w2:
-				w = w2
 			for i, p in enumerate(particles):
 				if i == bad_index:
 					velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = self.k)
 					particles[i] = np.random.rand(self.k)
+					pBest[i] = particles[i]
 				else:
-					velocity[i] = w*velocity[i] + c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
+					velocity[i] = c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
 					particles[i] = p +velocity[i]
 		#Optimal solution. The L&NL-ANN weights will be gBest
 		self.weight = gBest[:]
@@ -96,12 +93,29 @@ serie_lags = functions.gerar_janelas(tam_janela = 5, serie = serie_normal)
 X_train, y_train, X_test, y_test = functions.split_serie_with_lags(serie = serie_lags, perc_train = 0.8, perc_val = 0)
 
 model = Hybrid_ANN(m = 5)
-model.fit_MPSO(X = X_train, y = y_train, 
-	c1 = 1.0, c2 = 1.0 ,w1 = 1.0, w2 = 2.0, maxt = 500)
 
+# c = np.zeros(2)
+# best_mse = np.inf
+# best_weight = []
+# for c1 in [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]:
+# 	for c2 in [0.5, 1.0, 1.5, 2.0, 2.5, 3.0]:
+# 		model.fit_MPSO(X = X_train, y = y_train, d= 30,
+# 			c1 = c1, c2 = c2 ,w1 = 1.0, w2 = 2.0, maxt = 2000)
+# 		y_pred = model.predict(X_test)
+# 		temp_mse = mean_squared_error(y_test, y_pred)
+# 		if temp_mse < best_mse:
+# 			best_mse = temp_mse
+# 			best_weight = model.weight[:]
+# 			c[0] = c1
+# 			c[1] = c2
+
+# print('Best MSE:',best_mse,'c1:',c[0],'c2:',c[1])
+
+model.fit_MPSO(X = X_train, y = y_train, d= 30,
+	c1i = 1.0, c1f = 2.0, c2i = 2.5, c2f = 3.5, maxt = 2000)
 y_pred = model.predict(X_test)
-print('Prediction:', y_pred)
-print('Test:', y_test)
+# print('Prediction:', y_pred)
+# print('Test:', y_test)
 
 plt.plot(y_test, label = 'Original')
 plt.plot(y_pred, label = 'Prediction', color = 'red')
