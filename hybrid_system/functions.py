@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.metrics import mean_squared_error
 
 def normalizar_serie(serie):
 	minimo = min(serie)
@@ -66,3 +67,16 @@ def split_serie_with_lags(serie, perc_train, perc_val = 0):
 	    y_test = y_date[train_size:-1]
 
 	    return x_train, y_train, x_test, y_test
+
+def _percentage_error(actual: np.ndarray, predicted: np.ndarray):
+	EPSILON = 1e-10
+	return (actual - predicted) / (actual + EPSILON)
+
+def RMSE(y,output):
+  	return np.sqrt(mean_squared_error(y, output))
+
+def MAPE(actual: np.ndarray, predicted: np.ndarray):
+	return np.mean(np.abs(_percentage_error(actual, predicted)))
+
+def MdAPE(actual: np.ndarray, predicted: np.ndarray):
+	return np.median(np.abs(_percentage_error(actual, predicted)))

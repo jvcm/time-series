@@ -41,7 +41,7 @@ class Hybrid_ANN:
 		return net3
 
 	def fit_MPSO(self, X, y, d = 30, c1i = 2.0, c1f = 3.0, c2i = 2.0, c2f = 3.0,
-		w1 = 1.0, w2 = 2.0, maxt = 500):
+		w1 = 0.1, w2 = 1.0, maxt = 500):
 		#MPSO Algorythm
 		particles = np.random.rand(d, self.k)
 		velocity = np.random.uniform(low = -1.0, high = 1.0, size = (d, self.k))
@@ -71,7 +71,7 @@ class Hybrid_ANN:
 					particles[i] = np.random.rand(self.k)
 					pBest[i] = particles[i]
 				else:
-					velocity[i] = c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
+					velocity[i] = w*velocity[i] + c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
 					particles[i] = p +velocity[i]
 		#Optimal solution. The L&NL-ANN weights will be gBest
 		self.weight = gBest[:]
