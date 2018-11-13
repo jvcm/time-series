@@ -68,9 +68,12 @@ def split_serie_with_lags(serie, perc_train, perc_val = 0):
 
 	    return x_train, y_train, x_test, y_test
 
+def _error(actual: np.ndarray, predicted: np.ndarray):
+	return actual - predicted
+
 def _percentage_error(actual: np.ndarray, predicted: np.ndarray):
 	EPSILON = 1e-10
-	return (actual - predicted) / (actual + EPSILON)
+	return _error(actual, predicted) / (actual + EPSILON)
 
 def RMSE(y,output):
   	return np.sqrt(mean_squared_error(y, output))
@@ -80,3 +83,10 @@ def MAPE(actual: np.ndarray, predicted: np.ndarray):
 
 def MdAPE(actual: np.ndarray, predicted: np.ndarray):
 	return np.median(np.abs(_percentage_error(actual, predicted)))
+
+def DA(actual: np.ndarray, predicted: np.ndarray):
+	sign_vector = np.sign(np.multiply((actual[1:] - actual[:-1]), (predicted[1:] - actual[:-1])))
+	for i, element in enumerate(sign_vector):
+		if element == -1:
+			sign_vector[i] = 0
+	return np.mean(sign_vector)
