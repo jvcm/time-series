@@ -87,9 +87,13 @@ class LNL_ANN:
 
 
 class Hybrid_ANN:
-	def __init__(self, m = 5, pre_weight = w):
-		self.k = 3*m + 4
-		self.weight = np.random.rand(self.k)
+	def __init__(self, pre_weight: np.ndarray):
+		m = int((len(pre_weight)-4)/3)
+		self.k = len(pre_weight) + 3
+		self.weight = pre_weight[:]
+		self.weight = np.insert(self.weight, 3*m+1, np.random.uniform())
+		self.weight = np.insert(self.weight, 2*m+1, np.random.uniform())
+		self.weight = np.insert(self.weight, m, np.random.uniform())
 		return
 
 	def forward(self, weight, X):
@@ -125,18 +129,22 @@ class Hybrid_ANN:
 	def fit_MPSO(self, X, y, d = 30, c1i = 2.0, c1f = 3.0, c2i = 2.0, c2f = 3.0,
 		w1 = 0.1, w2 = 1.0, maxt = 500):
 		#MPSO Algorythm
-		particles = np.random.rand(d, self.k)
-		velocity = np.random.uniform(low = -1.0, high = 1.0, size = (d, self.k))
+		change = 3
+		m = int((len(self.weight)-4)/3)
+		particles = np.random.rand(d, change) #Experimental
+		velocity = np.random.uniform(low = -1.0, high = 1.0, size = (d, change)) #Experimental
 		pBest = particles[:]
-		gBest = self.weight[:]
+		gBest = particles[0]
 		best_fitness = np.full(d, np.inf)
+		aux_weight = self.weight[:]
 		# print(particles)
 		for t in range(maxt):
 			fitness = np.zeros(d)
 			for i, p in enumerate(particles):
+				aux_weight[[m, 2*m+2, 3*m+3]] = p[:] #Ligado ao 'change'
 				output = np.zeros(len(y))
 				for j, x in enumerate(X):
-					output[j] = self.forward(p, x)
+					output[j] = self.forward(aux_weight, x)
 				fitness[i] = mean_squared_error(y, output)
 				if fitness[i] < best_fitness[i]:
 					pBest[i] = p[:]
@@ -149,14 +157,14 @@ class Hybrid_ANN:
 			w = w1 + (w2 - w1)*((maxt - t)/maxt)
 			for i, p in enumerate(particles):
 				if i == bad_index:
-					velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = self.k)
-					particles[i] = np.random.rand(self.k)
+					velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = change)
+					particles[i] = np.random.rand(change)
 					pBest[i] = particles[i]
 				else:
 					velocity[i] = w*velocity[i] + c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
 					particles[i] = p +velocity[i]
 		#Optimal solution. The L&NL-ANN weights will be gBest
-		self.weight = gBest[:]
+		self.weight[[m, 2*m+2, 3*m+3]] = gBest[:] #Ligado ao 'change'
 		return
 
 	def predict(self, X_test):
