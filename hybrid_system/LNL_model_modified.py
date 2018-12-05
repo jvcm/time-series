@@ -14,12 +14,13 @@ class LNL_ANN:
 		return
 
 	def forward_series(self, weight, X):
-		w1 = weight[: self.m]
-		b1 = weight[self.m]
-		w2 = weight[self.m+1: 2*self.m+1]
-		b2 = weight[2*self.m+1: 3*self.m+1]
-		w3 = weight[3*self.m+1: 3*self.m+3]
-		b3 = weight[3*self.m+3]
+		m = int((len(weight) - 4)/3)
+		w1 = weight[: m]
+		b1 = weight[m]
+		w2 = weight[m+1: 2*m+1]
+		b2 = weight[2*m+1: 3*m+1]
+		w3 = weight[3*m+1: 3*m+3]
+		b3 = weight[3*m+3]
 		#Calculate Net1 and Net2
 		net1 = np.dot(X, w1) + b1
 		net2 = np.prod(X*w2 + b2)
@@ -115,7 +116,7 @@ class LNL_ANN:
 		velocity = np.random.uniform(low = -1.0, high = 1.0, size = (d, 3))
 		pBest = particles[:]
 		gBest = particles[0]
-		best_fitness = np.full(3, np.inf)
+		best_fitness = np.full(d, np.inf)
 
 		for t in range(maxt):
 			fitness = np.zeros(d)
@@ -135,8 +136,8 @@ class LNL_ANN:
 			w = w1 + (w2 - w1)*((maxt - t)/maxt)
 			for i, p in enumerate(particles):
 				if i == bad_index:
-					velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = k)
-					particles[i] = np.random.rand(k)
+					velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = 3)
+					particles[i] = np.random.rand(3)
 					pBest[i] = particles[i]
 				else:
 					velocity[i] = w*velocity[i] + c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
@@ -147,7 +148,44 @@ class LNL_ANN:
 
 
 	def predict(self, X_test):
-		predict = np.zeros(len(X_test))
+		series = np.zeros(len(X_test))
 		for i, x in enumerate(X_test):
-			predict[i] = self.forward(self.weight, x)
+			series[i] = self.forward_series(self.weight[:3*self.m+4], x)
+		y_test = X_test[1:,-1]
+		# print('X_test:%f - Predict:%f - y_test:%f'%(len(X_test), len(series), len(y_test)))
+		resid = functions._error(y_test, series[:-1])
+		resid_window = functions.gerar_janelas(tam_janela = self.z-1, serie = resid)
+		# print('resid_window:%f '%(len(resid_window)))
+		pred_resid = np.zeros(len(resid_window))
+		for i, x in enumerate(resid_window):
+			pred_resid[i] = self.forward_series(self.weight[3*self.m+4 : 3*self.m+4 + 3*self.z+4], x)
+		X_comb = np.hstack((series[self.z + 1: ].reshape(-1,1), pred_resid.reshape(-1,1)))
+		X_comb = np.hstack((X_comb, np.ones(len(X_comb)).reshape(-1,1)))
+		# print(len(X_comb))
+		predict = np.zeros(len(X_comb))
+		for i, x in enumerate(X_comb):
+			predict[i] = np.dot(self.weight[-3:], x)
 		return predict
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv('beer.csv')
+data = df.iloc[:, -1].values
+
+ent = 8
+
+serie_normal = functions.normalizar_serie(data)
+serie_lags = functions.gerar_janelas(tam_janela = ent, serie = serie_normal)
+X_train, y_train, X_test, y_test = functions.split_serie_with_lags(serie = serie_lags, perc_train = 0.86, perc_val = 0)
+
+model = LNL_ANN(m = ent, z = 2)
+model.fit_MPSO(X_train, y_train, d = 40, c1i = 1.0, c1f = 2.0, c2i = 1.0, c2f = 2.0, w1 = 0.2, w2 = 0.7, maxt = 2000)
+pred = model.predict(X_test)
+pred = functions.desnormalizar(pred, data)
+print('y_test:',data[-len(pred):],'\nprediction:',pred.values.reshape(1,-1))
+plt.plot(pred, label='Prediction')
+plt.plot(data[-len(pred):], label = 'Original')
+plt.legend()
+plt.show()
