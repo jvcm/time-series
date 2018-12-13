@@ -91,3 +91,9 @@ def DA(actual: np.ndarray, predicted: np.ndarray):
 		if element == -1:
 			sign_vector[i] = 0
 	return np.mean(sign_vector)
+
+def sigmoid(x, derivative=False):
+    sigm = 1. / (1. + np.exp(-x))
+    if derivative:
+        return sigm * (1. - sigm)
+    return sigm
