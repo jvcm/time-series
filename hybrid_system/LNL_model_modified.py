@@ -12,6 +12,7 @@ class LNL_ANN:
 		self.z = z
 		self.k = (3*m + 4) + (3*z + 4) + 3 # Series + Residual + Combination (MLP)
 		self.weight = np.random.rand(self.k) # Super particle
+		self._final = None
 		return
 
 	def forward_series(self, weight, X):
@@ -23,16 +24,29 @@ class LNL_ANN:
 		w3 = weight[-3:-1]
 		b3 = weight[-1]
 
-		#Calculate Net1 and Net2
-		net1 = np.dot(X, w1) + b1
-		net2 = np.prod(X*w2 + b2)
-
 		#Activation Functions
+		net1 = np.dot(X, w1) + b1
 		f1 = net1
-		f2 = functions.sigmoid(net2)
+		net2 = np.prod(X*w2 + b2)
+		# Avoid overflow error
+		try:
+			f2 = functions.sigmoid(net2)
+		except:
+			if net2 < 0:
+				f2 = 0
+			elif net2 > 0:
+				f2 = 1
+		
 		#Calculate Net3
 		net3 = w3[0]*f1 + w3[1]*f2 + b3
 		return net3
+	
+	def setFinalData(self, X_pre):
+		if (X_pre.shape[0] >= self.z + 1) and (X_pre.shape[1] == self.m):
+			self._final = X_pre[-(self.z + 1):, :]
+		else: 
+			print('Dimension mismatch - setFinalData function unable to execute.')
+		return
 	
 	def fit_MPSO(self, X, y, d = 30, c1i = 2.0, c1f = 3.0, c2i = 2.0, c2f = 3.0,
 		w1 = 0.5, w2 = 1.0, maxt = 1000):
