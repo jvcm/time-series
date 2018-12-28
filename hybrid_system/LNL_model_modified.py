@@ -28,14 +28,7 @@ class LNL_ANN:
 		net1 = np.dot(X, w1) + b1
 		f1 = net1
 		net2 = np.prod(X*w2 + b2)
-		# Avoid overflow error
-		try:
-			f2 = functions.sigmoid(net2)
-		except:
-			if net2 < 0:
-				f2 = 0
-			elif net2 > 0:
-				f2 = 1
+		f2 = functions.sigmoid(net2)
 		
 		#Calculate Net3
 		net3 = w3[0]*f1 + w3[1]*f2 + b3
