@@ -1,4 +1,3 @@
-Beer_consumption
 284.4
 226.9
 308.4

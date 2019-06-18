@@ -1,6 +1,6 @@
 import numpy as np
 
-def mean_square_error(y_true, y_pred):
+def mean_squared_error(y_true, y_pred):
     y_true = np.asmatrix(y_true).reshape(-1)
     y_pred = np.asmatrix(y_pred).reshape(-1)
  

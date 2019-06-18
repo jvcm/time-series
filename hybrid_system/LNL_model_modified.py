@@ -38,7 +38,7 @@ class LNL_ANN:
 	def forward_with_decision(self, weight, X):
 		#corrigir os indices da particula
 		
-		print('tam part', len(weight))
+# 		print('tam part', len(weight))
 		
 		m = int((len(weight) - 4)/3)
 		w1 = weight[:m]
@@ -63,13 +63,13 @@ class LNL_ANN:
 			bit_02 = 1
 			
 		
-		print('b4', b4)
+# 		print('b4', b4)
 	
 					
 			
-		print('-------------------------------------------------')
-		print('bit_01', bit_01)
-		print('bit_02', bit_02)
+# 		print('-------------------------------------------------')
+# 		print('bit_01', bit_01)
+# 		print('bit_02', bit_02)
 		
 		net1 = np.dot(X, w1) + b1
 		f1 = net1 * bit_01
@@ -89,8 +89,7 @@ class LNL_ANN:
 			print('Dimension mismatch - setFinalData function unable to execute.')
 		return
 	
-	def fit_MPSO(self, X, y, d = 30, c1i = 2.0, c1f = 3.0, c2i = 2.0, c2f = 3.0,
-		w1 = 0.5, w2 = 1.0, maxt = 1000):
+	def fit_MPSO(self, X, y, d = 30, c1 = 2.0, c2 = 2.0, w1 = 0.5, w2 = 1.0, maxt = 1000):
 
 		self.MSE_gBest = np.zeros(maxt)
 
@@ -133,8 +132,8 @@ class LNL_ANN:
 				if fitness[i] < best_fitness[i]:
 					pBest[i] = p[:]
 					best_fitness[i] = fitness[i]
-			if t%100==0:
-				print('Fitness da iteração:', t  ,' é:',  best_fitness[i] )
+# 			if t%100==0:
+# 				print('Fitness da iteração:', t  ,' é:',  best_fitness[i] )
 
 			#Choosing the best particle
 			self.MSE_gBest[t] = fitness.min()
@@ -142,8 +141,8 @@ class LNL_ANN:
 
 			# MPSO Parameters
 			bad_index = np.argmax(fitness)
-			c1 = ((c1f - c1i)*t/maxt) +c1i
-			c2 = ((c2f - c2i)*t/maxt) +c2i
+			# c1 = ((c1f - c1i)*t/maxt) +c1i
+			# c2 = ((c2f - c2i)*t/maxt) +c2i
 			w = w1 + (w2 - w1)*((maxt - t)/maxt)
 
 			for i, p in enumerate(particles):
