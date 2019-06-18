@@ -32,6 +32,44 @@ def gerar_janelas(tam_janela, serie):
 	    
 
 	return janelas_np
+	
+def select_lag_acf(serie, max_lag):
+    from statsmodels.tsa.stattools import acf
+    x = serie[0: max_lag+1]
+    
+    acf_x, confint = acf(serie, nlags=max_lag, alpha=.05, fft=False,
+                             unbiased=False)
+    
+    
+    limiar_superior = confint[:, 1] - acf_x
+    limiar_inferior = confint[:, 0] - acf_x
+
+    lags_selecionados = []
+    
+    for i in range(1, max_lag+1):
+
+        
+        if acf_x[i] >= limiar_superior[i] or acf_x[i] <= limiar_inferior[i]:
+            lags_selecionados.append(i-1)  #-1 por conta que o lag 1 em python é o 0
+    
+    #caso nenhum lag seja selecionado, essa atividade de seleção para o gridsearch encontrar a melhor combinação de lags
+    if len(lags_selecionados)==0:
+
+
+        print('NENHUM LAG POR ACF')
+        lags_selecionados = [i for i in range(max_lag)]
+
+    print('LAGS', lags_selecionados)
+
+    #inverte o valor dos lags para usar na lista de dados
+    lags_selecionados = [max_lag - (i+1) for i in lags_selecionados]
+
+
+
+    return lags_selecionados	
+
+	
+	
 
 def split_serie_with_lags(serie, perc_train, perc_val = 0):
 	#faz corte na serie com as janelas já formadas 

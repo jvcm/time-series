@@ -10,7 +10,7 @@ class LNL_ANN:
 	def __init__(self, m = 5, z = 2): # Series ANN (m)/ Residual ANN (z)
 		self.m = m
 		self.z = z
-		self.k = (3*m + 4) + (3*z + 4) + 3 # Series + Residual + Combination (MLP)
+		self.k = (3*m + 4) + (3*z + 4) + 3 + 1# Series + Residual + Combination (MLP) + binary 
 		self.weight = np.random.rand(self.k) # Super particle
 		self._final = None
 		return
@@ -21,9 +21,9 @@ class LNL_ANN:
 		b1 = weight[m]
 		w2 = weight[m+1:2*m+1]
 		b2 = weight[2*m+1:3*m+1]
-		w3 = weight[-3:-1]
-		b3 = weight[-1]
-
+		w3 = weight[3*m+1:3*m+3]
+		b3 = weight[3*m+3]
+		
 		#Activation Functions
 		net1 = np.dot(X, w1) + b1
 		f1 = net1
@@ -33,6 +33,54 @@ class LNL_ANN:
 		#Calculate Net3
 		net3 = w3[0]*f1 + w3[1]*f2 + b3
 		return net3
+		
+		
+	def forward_with_decision(self, weight, X):
+		#corrigir os indices da particula
+		
+		print('tam part', len(weight))
+		
+		m = int((len(weight) - 4)/3)
+		w1 = weight[:m]
+		b1 = weight[m]
+		w2 = weight[m+1:2*m+1]
+		b2 = weight[2*m+1:3*m+1]
+		w3 = weight[3*m+1:3*m+3]
+		b3 = weight[3*m+3]
+
+		b4 = weight[-1] 
+
+		
+		bit_01 = 0
+		bit_02 = 0
+		
+		if b4 < 0.3:
+			bit_01 = 1
+		elif b4>= 0.3 and b4 <0.6:
+			bit_02 = 1
+		else:
+			bit_01 = 1
+			bit_02 = 1
+			
+		
+		print('b4', b4)
+	
+					
+			
+		print('-------------------------------------------------')
+		print('bit_01', bit_01)
+		print('bit_02', bit_02)
+		
+		net1 = np.dot(X, w1) + b1
+		f1 = net1 * bit_01
+		net2 = np.prod(X*w2 + b2)
+		f2 = functions.sigmoid(net2)
+		f2 = f2 * bit_02
+		
+		#Calculate Net3
+		net3 = w3[0]*f1 + w3[1]*f2 + b3
+		return net3
+		
 	
 	def setFinalData(self, X_pre):
 		if (X_pre.shape[0] >= self.z + 1) and (X_pre.shape[1] == self.m):
@@ -71,7 +119,7 @@ class LNL_ANN:
 # 2nd Layer: Residual Forecasting
 				predict_res = np.zeros(len(X_error_train))
 				for j, x in enumerate(X_error_train):
-					predict_res[j] = self.forward_series(p[3*self.m+4 : 3*self.m+4 + 3*self.z+4], x)
+					predict_res[j] = self.forward_with_decision(p[3*self.m+4 : 3*self.m+4 + 3*self.z+6], x)
 # Super particle
 # 3rd Layer: Combination
 				X_comb = np.hstack((predict[self.z:].reshape(-1,1), predict_res.reshape(-1,1)))
@@ -85,6 +133,8 @@ class LNL_ANN:
 				if fitness[i] < best_fitness[i]:
 					pBest[i] = p[:]
 					best_fitness[i] = fitness[i]
+			if t%100==0:
+				print('Fitness da iteração:', t  ,' é:',  best_fitness[i] )
 
 			#Choosing the best particle
 			self.MSE_gBest[t] = fitness.min()
