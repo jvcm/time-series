@@ -42,6 +42,8 @@ class LNL_ANN:
 
 	def fit_MPSO(self, X, y, d = 30, c1i = 2.0, c1f = 3.0, c2i = 2.0, c2f = 3.0,
 		w1 = 0.1, w2 = 1.0, maxt = 500):
+
+		self.MSE_gBest = []
 		#MPSO Algorythm
 		particles = np.random.rand(d, self.k)
 		velocity = np.random.uniform(low = -1.0, high = 1.0, size = (d, self.k))
@@ -60,6 +62,8 @@ class LNL_ANN:
 					pBest[i] = p[:]
 					best_fitness[i] = fitness[i]
 			# print(best_fitness)
+			if t%10 == 0:
+				self.MSE_gBest.append(fitness.min())
 			gBest = particles[np.argmin(fitness)]
 			bad_index = np.argmax(fitness)
 			c1 = ((c1f - c1i)*t/maxt) +c1i
@@ -73,6 +77,7 @@ class LNL_ANN:
 				else:
 					velocity[i] = w*velocity[i] + c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
 					particles[i] = p +velocity[i]
+			
 		#Optimal solution. The L&NL-ANN weights will be gBest
 		self.weight = gBest[:]
 		return

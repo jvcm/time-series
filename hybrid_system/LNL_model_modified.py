@@ -89,9 +89,9 @@ class LNL_ANN:
 			print('Dimension mismatch - setFinalData function unable to execute.')
 		return
 	
-	def fit_MPSO(self, X, y, d = 30, c1 = 2.0, c2 = 2.0, w1 = 0.5, w2 = 1.0, maxt = 1000):
+	def fit_MPSO(self, X, y, d = 30, c1 = 2.0, c2 = 2.0, w = 1.0, maxt = 1000):
 
-		self.MSE_gBest = np.zeros(maxt)
+		self.MSE_gBest = []
 
 		# Final part of training set to make full prediction of test set
 		self._final = X[-(self.z + 1):, :]
@@ -136,14 +136,15 @@ class LNL_ANN:
 # 				print('Fitness da iteração:', t  ,' é:',  best_fitness[i] )
 
 			#Choosing the best particle
-			self.MSE_gBest[t] = fitness.min()
+			if t%10 == 0:
+				self.MSE_gBest.append(fitness.min())
 			gBest = particles[np.argmin(fitness)]
 
 			# MPSO Parameters
 			bad_index = np.argmax(fitness)
 			# c1 = ((c1f - c1i)*t/maxt) +c1i
 			# c2 = ((c2f - c2i)*t/maxt) +c2i
-			w = w1 + (w2 - w1)*((maxt - t)/maxt)
+			# w = w1 + (w2 - w1)*((maxt - t)/maxt)
 
 			for i, p in enumerate(particles):
 				if i == bad_index:
