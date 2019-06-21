@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import mean_squared_error
+from error_functions import mean_squared_error
 import math
 import random
 import functions

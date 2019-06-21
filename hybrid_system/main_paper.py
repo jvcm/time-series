@@ -63,8 +63,7 @@ def main():
         for i in range(repetitions):
             functions.update_progress(i/ repetitions)
             model = hybrid_ann.LNL_ANN(m = len(lags_acf))
-            model.fit_MPSO(X_train, y_train, n_particles, c1i = 2.0, c1f = 3.0, c2i = 2.0, c2f = 3.0,
-            w1 = 0.1, w2 = 1.0, maxt = epochs)
+            model.fit_MPSO(X_train, y_train, n_particles, c1 = 2.0, c2 = 2.0, w = 1, maxt = epochs)
             modelos.append(model)    
             y_pred = model.predict(X_test)
             test_mse = mean_squared_error(y_test, y_pred)

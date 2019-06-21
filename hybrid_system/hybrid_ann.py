@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.metrics import mean_squared_error
+from error_functions import mean_squared_error
 import math
 import random
 import functions
@@ -40,8 +40,7 @@ class LNL_ANN:
 		# print(net3)
 		return net3
 
-	def fit_MPSO(self, X, y, d = 30, c1i = 2.0, c1f = 3.0, c2i = 2.0, c2f = 3.0,
-		w1 = 0.1, w2 = 1.0, maxt = 500):
+	def fit_MPSO(self, X, y, d = 30, c1 = 2.0, c2 = 2.0, w = 1, maxt = 500):
 
 		self.MSE_gBest = []
 		#MPSO Algorythm
@@ -66,9 +65,9 @@ class LNL_ANN:
 				self.MSE_gBest.append(fitness.min())
 			gBest = particles[np.argmin(fitness)]
 			bad_index = np.argmax(fitness)
-			c1 = ((c1f - c1i)*t/maxt) +c1i
-			c2 = ((c2f - c2i)*t/maxt) +c2i
-			w = w1 + (w2 - w1)*((maxt - t)/maxt)
+			# c1 = ((c1f - c1i)*t/maxt) +c1i
+			# c2 = ((c2f - c2i)*t/maxt) +c2i
+			# w = w1 + (w2 - w1)*((maxt - t)/maxt)
 			for i, p in enumerate(particles):
 				if i == bad_index:
 					velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = self.k)
