@@ -36,7 +36,8 @@ class LNL_ANN:
 		
 		
 	def forward_with_decision(self, weight, X):
-		#corrigir os indices da particula
+		#corrigir os indices da partic
+		# ula
 		
 # 		print('tam part', len(weight))
 		
@@ -118,7 +119,7 @@ class LNL_ANN:
 # 2nd Layer: Residual Forecasting
 				predict_res = np.zeros(len(X_error_train))
 				for j, x in enumerate(X_error_train):
-					predict_res[j] = self.forward_with_decision(p[3*self.m+4 : 3*self.m+4 + 3*self.z+6], x)
+					predict_res[j] = self.forward_with_decision(p[3*self.m+4 : -3], x)
 # Super particle
 # 3rd Layer: Combination
 				X_comb = np.hstack((predict[self.z:].reshape(-1,1), predict_res.reshape(-1,1)))
@@ -141,19 +142,19 @@ class LNL_ANN:
 			gBest = particles[np.argmin(fitness)]
 
 			# MPSO Parameters
-			bad_index = np.argmax(fitness)
+			# bad_index = np.argmax(fitness)
 			# c1 = ((c1f - c1i)*t/maxt) +c1i
 			# c2 = ((c2f - c2i)*t/maxt) +c2i
 			# w = w1 + (w2 - w1)*((maxt - t)/maxt)
 
 			for i, p in enumerate(particles):
-				if i == bad_index:
-					velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = self.k)
-					particles[i] = np.random.rand(self.k)
-					pBest[i] = particles[i]
-				else:
-					velocity[i] = w*velocity[i] + c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
-					particles[i] = p +velocity[i]
+				# if i == bad_index:
+				# 	velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = self.k)
+				# 	particles[i] = np.random.rand(self.k)
+				# 	pBest[i] = particles[i]
+				# else:
+				velocity[i] = w*velocity[i] + c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
+				particles[i] = p +velocity[i]
 		
 		self.weight = gBest[:]
 		return

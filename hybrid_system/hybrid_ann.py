@@ -64,18 +64,18 @@ class LNL_ANN:
 			if t%10 == 0:
 				self.MSE_gBest.append(fitness.min())
 			gBest = particles[np.argmin(fitness)]
-			bad_index = np.argmax(fitness)
+			# bad_index = np.argmax(fitness)
 			# c1 = ((c1f - c1i)*t/maxt) +c1i
 			# c2 = ((c2f - c2i)*t/maxt) +c2i
 			# w = w1 + (w2 - w1)*((maxt - t)/maxt)
 			for i, p in enumerate(particles):
-				if i == bad_index:
-					velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = self.k)
-					particles[i] = np.random.rand(self.k)
-					pBest[i] = particles[i]
-				else:
-					velocity[i] = w*velocity[i] + c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
-					particles[i] = p +velocity[i]
+				# if i == bad_index:
+				# 	velocity[i] = np.random.uniform(low = -1.0, high = 1.0, size = self.k)
+				# 	particles[i] = np.random.rand(self.k)
+				# 	pBest[i] = particles[i]
+				# else:
+				velocity[i] = w*velocity[i] + c1*random.uniform(0, 1)*(pBest[i] - p) + c2*random.uniform(0, 1)*(gBest - p)
+				particles[i] = p +velocity[i]
 			
 		#Optimal solution. The L&NL-ANN weights will be gBest
 		self.weight = gBest[:]
