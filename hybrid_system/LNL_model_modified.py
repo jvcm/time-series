@@ -175,7 +175,7 @@ class LNL_ANN:
 
 		pred_resid = np.zeros(len(resid_window))
 		for i, x in enumerate(resid_window):
-			pred_resid[i] = self.forward_series(self.weight[3*self.m+4 : 3*self.m+4 + 3*self.z+4], x)
+			pred_resid[i] = self.forward_with_decision(self.weight[3*self.m+4 : -3], x)
 		X_comb = np.hstack((series[self.z + 1:].reshape(-1,1), pred_resid.reshape(-1,1)))
 		X_comb = np.hstack((X_comb, np.ones(len(X_comb)).reshape(-1,1)))
 
