@@ -17,7 +17,7 @@ from matplotlib.pylab import rcParams
 ### Dataset ###
 
 name = 'Beer'
-df = pd.read_csv(name + '.csv')
+df = pd.read_csv('./data/' + name + '.csv')
 data = df.iloc[:, -1].values
 
 if name not in os.listdir('./results/'):
