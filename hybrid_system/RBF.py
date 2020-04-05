@@ -35,12 +35,12 @@ class RBF:
         rnd_idx = random.permutation(X.shape[0])[:self.numCenters]
         self.centers = [X[i, :] for i in rnd_idx]
 
-        print
-        "center", self.centers
+        #print
+        #"center", self.centers
         # calculate activations of RBFs
         G = self._calcAct(X)
-        print
-        G
+        #print
+        #G
 
         # calculate output weights (pseudoinverse)
         self.W = dot(pinv(G), Y)
