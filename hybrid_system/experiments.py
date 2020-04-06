@@ -14,12 +14,15 @@ import statsmodels.api as sm
 import seaborn as sns
 sns.set()
 from matplotlib.pylab import rcParams
+from progress.bar import IncrementalBar
+
 
 ### Dataset ###
 
 name = 'Lynx'
 df = pd.read_csv('./data/' + name + '.csv')
 data = df.iloc[:, -1].values
+data = np.log(data)
 
 if name not in os.listdir('./results/'):
     os.mkdir('./results/' + name) # Create directory for current dataset
@@ -29,6 +32,13 @@ if name not in os.listdir('./results/'):
 ent = 4 # Janela do modelo normal
 n_exp = 30 # Numero de experimentos
 tam_jan = 2 # Janela do ruido
+bar = IncrementalBar('Countdown', max = n_exp)
+
+# Sarima
+order = (2,0,0)
+
+#WMES
+s_periods= 12
 
 serie_lags = functions.gerar_janelas(tam_janela = ent, serie = data)
 X_train, y_train, X_test, y_test = functions.split_serie_with_lags(serie = serie_lags, perc_train = 0.86, perc_val = 0)
@@ -48,6 +58,7 @@ predictions_other = pd.DataFrame()
 #### Experiments ####
 
 for i in range(n_exp):
+    bar.next()
     
     ############################## Hybrid LNL ANN (Original) ##############################
 
@@ -141,7 +152,8 @@ for i in range(n_exp):
                  functions.DA(y_test, ffann_pred)])
     
     predictions_ffann['FFANN_' + str(i + 1)] = ffann_pred[:]
-    
+
+bar.finish()
 
 ############################## SARIMA ##############################
 
@@ -149,7 +161,7 @@ ref = len(data) - len(y_test)
 historico = [x for x in data[:ref]]
 previsoes = []
 for i in range(len(y_test)):
-    modelo = sm.tsa.statespace.SARIMAX(historico, order=(2,0,0),seasonal_order=(0,1,1,4)).fit()
+    modelo = sm.tsa.statespace.SARIMAX(historico, order= order,seasonal_order=(0,1,1,4)).fit()
     prev = modelo.forecast()[0]
     previsoes.append(prev)
     obs = y_test[i]
@@ -158,7 +170,7 @@ sarima = np.array(previsoes)
 
 ############################## WMES ##############################
 
-fit2 = ExponentialSmoothing(data[:ref-2], seasonal_periods = 12, trend='add', seasonal='mul').fit(use_boxcox=True)
+fit2 = ExponentialSmoothing(data[:ref-2], seasonal_periods = s_periods, trend='add', seasonal='mul').fit(use_boxcox=True)
 wmes = fit2.forecast(len(y_test))
 
 ######################################################################
