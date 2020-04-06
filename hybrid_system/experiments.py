@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_squared_error
@@ -16,7 +17,7 @@ from matplotlib.pylab import rcParams
 
 ### Dataset ###
 
-name = 'Beer'
+name = 'Lynx'
 df = pd.read_csv('./data/' + name + '.csv')
 data = df.iloc[:, -1].values
 
@@ -25,7 +26,7 @@ if name not in os.listdir('./results/'):
 
 ### Set parameters according to dataset ###
 
-ent = 8 # Janela do modelo normal
+ent = 4 # Janela do modelo normal
 n_exp = 30 # Numero de experimentos
 tam_jan = 2 # Janela do ruido
 
@@ -116,7 +117,7 @@ for i in range(n_exp):
     lags = functions.gerar_janelas(tam_janela = ent, serie = serie_normal)
     X_train_, y_train_, X_test_, _ = functions.split_serie_with_lags(serie = lags, perc_train = 0.86, perc_val = 0)
 
-    rbf = RBF(8, 32, 1)
+    rbf = RBF(ent, 32, 1)
     rbf.train(X_train_, y_train_)
     z = rbf.test(X_test_)
     z = functions.desnormalizar(z, data).iloc[:,0].values
@@ -148,7 +149,7 @@ ref = len(data) - len(y_test)
 historico = [x for x in data[:ref]]
 previsoes = []
 for i in range(len(y_test)):
-    modelo = sm.tsa.statespace.SARIMAX(historico, order=(0,1,1),seasonal_order=(0,1,1,4)).fit()
+    modelo = sm.tsa.statespace.SARIMAX(historico, order=(2,0,0),seasonal_order=(0,1,1,4)).fit()
     prev = modelo.forecast()[0]
     previsoes.append(prev)
     obs = y_test[i]
@@ -157,7 +158,7 @@ sarima = np.array(previsoes)
 
 ############################## WMES ##############################
 
-fit2 = ExponentialSmoothing(data[:ref-2], seasonal_periods = 4, trend='add', seasonal='mul').fit(use_boxcox=True)
+fit2 = ExponentialSmoothing(data[:ref-2], seasonal_periods = 12, trend='add', seasonal='mul').fit(use_boxcox=True)
 wmes = fit2.forecast(len(y_test))
 
 ######################################################################
