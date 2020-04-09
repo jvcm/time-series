@@ -19,17 +19,17 @@ from progress.bar import IncrementalBar
 
 ### Dataset ###
 
-name = 'Lynx'
-df = pd.read_csv('./data/' + name + '.csv')
+name = 'Stock'
+df = pd.read_csv('./data/' + name + '.txt', header= None)
 data = df.iloc[:, -1].values
-data = np.log(data)
+# data = np.log(data)
 
 if name not in os.listdir('./results/'):
     os.mkdir('./results/' + name) # Create directory for current dataset
 
 ### Set parameters according to dataset ###
 
-ent = 4 # Janela do modelo normal
+ent = 2 # Janela do modelo normal
 n_exp = 40 # Numero de experimentos
 tam_jan = 2 # Janela do ruido
 print('Data set: ' + name)
